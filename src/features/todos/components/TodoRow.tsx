@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   Checkbox,
   IconButton,
@@ -8,61 +9,41 @@ import {
   alpha,
 } from '@mui/material'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
-import { ToDo, ToDoRequest } from '../types/api'
-import { getDeadlineStatus } from '../utils/date'
 import DeadlineCell from './DeadlineCell'
 import TodoRowEditor from './TodoRowEditor'
+import { ToDo } from '../../../types/api'
+import { useTodoListStore } from '../store'
+import { getDeadlineStatus } from '../../../utils/date'
 
-/** {@link TodoRow}의 props. */
+/** {@link TodoRow}의 props. (선택 상태는 store에서 직접 구독합니다.) */
 interface TodoRowProps {
   /** 이 행이 렌더링하는 할 일. */
   todo: ToDo
-  /** 이 행의 선택 체크박스가 체크되었는지 여부. */
-  selected: boolean
   /** 이 행이 현재 인라인 편집 모드인지 여부. */
   editing: boolean
-  /** 이 행의 선택을 토글합니다. 할 일 id를 받습니다. */
-  onToggleSelect: (id: number) => void
   /** 할 일의 완료 상태를 토글합니다. */
   onToggleDone: (todo: ToDo) => void
   /** 주어진 id의 편집 모드로 진입합니다. */
   onStartEdit: (id: number) => void
-  /** 저장하지 않고 편집 모드를 빠져나갑니다. */
-  onCancelEdit: () => void
-  /** 주어진 id의 수정 내용을 저장합니다. 실패 시 reject해야 합니다. */
-  onSaveEdit: (id: number, body: ToDoRequest) => Promise<void>
+  /** 편집 모드를 종료합니다(취소 및 저장 성공 시 공통). */
+  onStopEdit: () => void
 }
 
 /**
- * 단일 테이블 행(데스크톱 레이아웃). 선택·완료 체크박스는 항상 표시되며,
- * 나머지 셀은 읽기 뷰(할 일, 기한, 수정 버튼)와 `editing`이 true일 때의
- * {@link TodoRowEditor} 사이를 전환합니다. {@link TodoTable} 안에서 항목별로
- * 렌더링되도록 설계되었습니다.
- *
- * @example
- * ```tsx
- * <TodoRow
- *   todo={todo}
- *   selected={selectedIds.has(todo.id)}
- *   editing={editingId === todo.id}
- *   onToggleSelect={handleToggleSelect}
- *   onToggleDone={toggleDone}
- *   onStartEdit={handleStartEdit}
- *   onCancelEdit={handleCancelEdit}
- *   onSaveEdit={handleSaveEdit}
- * />
- * ```
+ * 단일 테이블 행(데스크톱). 자신의 **선택 상태만 store에서 구독**하므로, 다른
+ * 행을 선택해도 이 행은 리렌더되지 않습니다(`memo`). 편집/완료/저장 핸들러는
+ * 부모(테이블)가 안정적 참조로 내려줍니다.
  */
-export default function TodoRow({
+function TodoRow({
   todo,
-  selected,
   editing,
-  onToggleSelect,
   onToggleDone,
   onStartEdit,
-  onCancelEdit,
-  onSaveEdit,
+  onStopEdit,
 }: TodoRowProps) {
+  const selected = useTodoListStore((s) => s.selectedIds.has(todo.id))
+  const toggleSelect = useTodoListStore((s) => s.toggleSelect)
+
   const status = getDeadlineStatus(todo.deadline)
   const highlight = !todo.done && (status === 'soon' || status === 'overdue')
 
@@ -84,7 +65,7 @@ export default function TodoRow({
       <TableCell padding="checkbox">
         <Checkbox
           checked={selected}
-          onChange={() => onToggleSelect(todo.id)}
+          onChange={() => toggleSelect(todo.id)}
           inputProps={{ 'aria-label': `${todo.text} 선택` }}
         />
       </TableCell>
@@ -100,11 +81,7 @@ export default function TodoRow({
       </TableCell>
 
       {editing ? (
-        <TodoRowEditor
-          todo={todo}
-          onCancelEdit={onCancelEdit}
-          onSaveEdit={onSaveEdit}
-        />
+        <TodoRowEditor todo={todo} onStopEdit={onStopEdit} />
       ) : (
         <>
           <TableCell>
@@ -137,3 +114,5 @@ export default function TodoRow({
     </TableRow>
   )
 }
+
+export default memo(TodoRow)
