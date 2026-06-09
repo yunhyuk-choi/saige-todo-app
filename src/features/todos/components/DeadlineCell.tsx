@@ -1,11 +1,7 @@
 import { Chip, Stack, Typography } from '@mui/material'
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded'
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
-import {
-  deadlineLabel,
-  formatDate,
-  getDeadlineStatus,
-} from '../utils/date'
+import { deadlineLabel, formatDate, getDeadlineStatus } from '../../../utils/date'
 
 /** {@link DeadlineCell}의 props. */
 interface DeadlineCellProps {
