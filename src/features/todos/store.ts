@@ -5,9 +5,9 @@ const DEBOUNCE_MS = 300
 let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
 /**
- * 목록 화면의 client UI 상태(검색어/선택/페이지네이션) store. 각 컴포넌트는
+ * 목록 화면의 client UI 상태(검색어/선택/고정/페이지네이션) store. 각 컴포넌트는
  * selector로 필요한 slice만 구독하므로, 무관한 상태 변경이 무관한 컴포넌트를
- * 리렌더하지 않습니다. 검색어와 페이지 크기는 localStorage에 영속화됩니다.
+ * 리렌더하지 않습니다. 검색어·페이지 크기·고정 목록은 localStorage에 영속화됩니다.
  */
 interface TodoListStore {
   /** 입력란에 즉시 반영되는 검색어. */
@@ -27,8 +27,14 @@ interface TodoListStore {
   toggleSelectAll: (ids: number[]) => void
   /** 모든 선택 해제. */
   clearSelection: () => void
-  /** 더 이상 존재하지 않는 항목의 선택을 정리. */
-  pruneSelection: (existingIds: number[]) => void
+
+  /** 상단에 고정된 할 일 id 목록(영속). */
+  pinnedIds: number[]
+  /** 해당 항목의 고정/해제를 토글합니다. */
+  togglePin: (id: number) => void
+
+  /** 더 이상 존재하지 않는 항목의 선택·고정을 정리. */
+  pruneMissing: (existingIds: number[]) => void
 
   /** 0부터 시작하는 현재 페이지. */
   page: number
@@ -74,16 +80,29 @@ export const useTodoListStore = create<TodoListStore>()(
           return { selectedIds: next }
         }),
       clearSelection: () => set({ selectedIds: new Set() }),
-      pruneSelection: (existingIds) =>
+
+      pinnedIds: [],
+      togglePin: (id) =>
+        set((s) => ({
+          pinnedIds: s.pinnedIds.includes(id)
+            ? s.pinnedIds.filter((x) => x !== id)
+            : [...s.pinnedIds, id],
+        })),
+
+      pruneMissing: (existingIds) =>
         set((s) => {
           const existing = new Set(existingIds)
-          const next = new Set<number>()
-          let changed = false
-          s.selectedIds.forEach((id) => {
-            if (existing.has(id)) next.add(id)
-            else changed = true
-          })
-          return changed ? { selectedIds: next } : {}
+          const nextSelected = new Set(
+            [...s.selectedIds].filter((id) => existing.has(id))
+          )
+          const nextPinned = s.pinnedIds.filter((id) => existing.has(id))
+          const selChanged = nextSelected.size !== s.selectedIds.size
+          const pinChanged = nextPinned.length !== s.pinnedIds.length
+          if (!selChanged && !pinChanged) return {}
+          return {
+            ...(selChanged ? { selectedIds: nextSelected } : {}),
+            ...(pinChanged ? { pinnedIds: nextPinned } : {}),
+          }
         }),
 
       page: 0,
@@ -97,6 +116,7 @@ export const useTodoListStore = create<TodoListStore>()(
         keyword: s.keyword,
         query: s.query,
         pageSize: s.pageSize,
+        pinnedIds: s.pinnedIds,
       }),
     }
   )

@@ -2,6 +2,7 @@ import { memo } from 'react'
 import {
   Checkbox,
   IconButton,
+  Stack,
   TableCell,
   TableRow,
   Tooltip,
@@ -9,6 +10,8 @@ import {
   alpha,
 } from '@mui/material'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded'
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined'
 import DeadlineCell from './DeadlineCell'
 import TodoRowEditor from './TodoRowEditor'
 import { ToDo } from '../../../types/api'
@@ -43,6 +46,8 @@ function TodoRow({
 }: TodoRowProps) {
   const selected = useTodoListStore((s) => s.selectedIds.has(todo.id))
   const toggleSelect = useTodoListStore((s) => s.toggleSelect)
+  const pinned = useTodoListStore((s) => s.pinnedIds.includes(todo.id))
+  const togglePin = useTodoListStore((s) => s.togglePin)
 
   const status = getDeadlineStatus(todo.deadline)
   const highlight = !todo.done && (status === 'soon' || status === 'overdue')
@@ -100,14 +105,33 @@ function TodoRow({
             <DeadlineCell deadline={todo.deadline} done={todo.done} />
           </TableCell>
           <TableCell align="right">
-            <Tooltip title="수정">
-              <IconButton
-                onClick={() => onStartEdit(todo.id)}
-                aria-label={`${todo.text} 수정`}
-              >
-                <EditRoundedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+              <Tooltip title={pinned ? '고정 해제' : '상단 고정'}>
+                <IconButton
+                  size="small"
+                  color={pinned ? 'primary' : 'default'}
+                  onClick={() => togglePin(todo.id)}
+                  aria-label={
+                    pinned ? `${todo.text} 고정 해제` : `${todo.text} 상단 고정`
+                  }
+                >
+                  {pinned ? (
+                    <PushPinRoundedIcon fontSize="small" />
+                  ) : (
+                    <PushPinOutlinedIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="수정">
+                <IconButton
+                  size="small"
+                  onClick={() => onStartEdit(todo.id)}
+                  aria-label={`${todo.text} 수정`}
+                >
+                  <EditRoundedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Stack>
           </TableCell>
         </>
       )}
