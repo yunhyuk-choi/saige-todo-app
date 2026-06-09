@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { focusRing } from '../../lib/ui'
 import { useToastStore } from '../../stores/toastStore'
 
 // 토스트는 순수 렌더만. 자동 닫힘/Undo 타이머는 push한 쪽에서 관리(effect ❌).
@@ -20,11 +21,20 @@ export function ToastViewport() {
         >
           <span>{t.message}</span>
           {t.actionLabel && (
-            <button type="button" className="font-semibold text-blue-300" onClick={() => t.onAction?.()}>
+            <button
+              type="button"
+              className={cn('rounded font-semibold text-indigo-300 hover:text-indigo-200', focusRing)}
+              onClick={() => t.onAction?.()}
+            >
               {t.actionLabel}
             </button>
           )}
-          <button type="button" aria-label="닫기" className="text-gray-400" onClick={() => dismiss(t.id)}>
+          <button
+            type="button"
+            aria-label="닫기"
+            className={cn('rounded text-gray-400 hover:text-white', focusRing)}
+            onClick={() => dismiss(t.id)}
+          >
             <X className="size-4" aria-hidden />
           </button>
         </div>

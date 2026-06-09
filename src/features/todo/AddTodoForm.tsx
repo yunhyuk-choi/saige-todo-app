@@ -1,9 +1,14 @@
+import { Plus } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { useCreateTodo } from '../../hooks/useTodos'
+import { cn } from '../../lib/cn'
 import { fromDateInputValue, startOfToday, toDateInputValue } from '../../lib/date'
+import { focusRing } from '../../lib/ui'
 
-const inputClass =
-  'rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900'
+const inputClass = cn(
+  'rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-950',
+  focusRing,
+)
 
 export function AddTodoForm() {
   const [text, setText] = useState('')
@@ -44,16 +49,17 @@ export function AddTodoForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+      className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
     >
       <div className="flex flex-wrap items-center gap-2">
         <input
-          className={`${inputClass} min-w-40 flex-1`}
+          className={cn(inputClass, 'min-w-40 flex-1')}
           placeholder="할 일을 입력하세요"
           value={text}
           onChange={(e) => setText(e.target.value)}
           aria-label="할 일 내용"
           aria-invalid={Boolean(error)}
+          aria-describedby={error ? 'add-todo-error' : undefined}
         />
         <input
           className={inputClass}
@@ -66,12 +72,20 @@ export function AddTodoForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50',
+            focusRing,
+          )}
         >
+          <Plus className="size-4" aria-hidden />
           추가
         </button>
       </div>
-      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+      {error && (
+        <p id="add-todo-error" role="alert" className="mt-2 text-xs text-red-500">
+          {error}
+        </p>
+      )}
     </form>
   )
 }

@@ -53,17 +53,17 @@ describe('TodoPage', () => {
     expect(screen.queryByText('운동 하기')).not.toBeInTheDocument()
   })
 
-  it('완료 체크 시 완료 상태가 반영되고 취소선이 표시된다', async () => {
+  it('완료 토글 시 완료 상태가 반영되고 취소선이 표시된다', async () => {
     const user = userEvent.setup()
     renderPage()
     await screen.findByText(/할 일이 없습니다/)
     await addTodo(user, '보고서 작성')
 
-    const doneCheckbox = screen.getByLabelText('보고서 작성 완료')
-    await user.click(doneCheckbox)
+    // 완료 토글은 별도 버튼(선택 체크박스와 구분)
+    await user.click(screen.getByRole('button', { name: '보고서 작성 완료 처리' }))
 
-    expect(doneCheckbox).toBeChecked()
-    // 취소선은 텍스트를 감싸는 컨테이너에 적용된다
+    // 완료 후 라벨이 '완료 취소'로 바뀐다 = 다시 진행중으로 되돌릴 수 있다
+    expect(await screen.findByRole('button', { name: '보고서 작성 완료 취소' })).toBeInTheDocument()
     expect(screen.getByText('보고서 작성').parentElement).toHaveClass('line-through')
   })
 })

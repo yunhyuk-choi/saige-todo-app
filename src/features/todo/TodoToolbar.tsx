@@ -1,5 +1,6 @@
 import { Search, Trash2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { focusRing } from '../../lib/ui'
 import { type PageSize, type StatusFilter, usePrefsStore } from '../../stores/prefsStore'
 import { useSelectionStore } from '../../stores/selectionStore'
 import { useDeferredDelete } from './useDeferredDelete'
@@ -29,19 +30,29 @@ export function TodoToolbar({ allIds }: { allIds: number[] }) {
   const someChecked = selectedCount > 0 && !allChecked
 
   return (
-    <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+    <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-40 flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" aria-hidden />
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+            aria-hidden
+          />
           <input
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm dark:border-gray-700 dark:bg-gray-950"
+            className={cn(
+              'w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm dark:border-gray-700 dark:bg-gray-950',
+              focusRing,
+            )}
             placeholder="검색"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             aria-label="검색"
           />
         </div>
-        <div className="inline-flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700" role="group" aria-label="상태 필터">
+        <div
+          className="inline-flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800"
+          role="group"
+          aria-label="상태 필터"
+        >
           {FILTERS.map((f) => (
             <button
               key={f.value}
@@ -49,18 +60,24 @@ export function TodoToolbar({ allIds }: { allIds: number[] }) {
               aria-pressed={statusFilter === f.value}
               onClick={() => setStatusFilter(f.value)}
               className={cn(
-                'px-3 py-2 text-sm',
-                statusFilter === f.value ? 'bg-blue-500 text-white' : 'bg-transparent',
+                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                statusFilter === f.value
+                  ? 'bg-white text-indigo-600 shadow-sm dark:bg-gray-700 dark:text-indigo-300'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200',
+                focusRing,
               )}
             >
               {f.label}
             </button>
           ))}
         </div>
-        <label className="text-sm text-gray-500">
-          표시{' '}
+        <label className="flex items-center gap-1.5 text-sm text-gray-500">
+          표시
           <select
-            className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-950"
+            className={cn(
+              'rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-950',
+              focusRing,
+            )}
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value) as PageSize)}
             aria-label="페이지 크기"
@@ -74,8 +91,8 @@ export function TodoToolbar({ allIds }: { allIds: number[] }) {
         </label>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-        <label className="flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3 text-sm dark:border-gray-800">
+        <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
             checked={allChecked}
@@ -84,15 +101,21 @@ export function TodoToolbar({ allIds }: { allIds: number[] }) {
             }}
             onChange={(e) => setMany(allIds, e.target.checked)}
             aria-label="전체 선택"
+            className={cn('size-4 cursor-pointer accent-indigo-600', focusRing)}
           />
           전체선택
         </label>
-        <span className="text-gray-500">{selectedCount}개 선택됨</span>
+        <span className="text-gray-500" aria-live="polite">
+          {selectedCount}개 선택됨
+        </span>
         <button
           type="button"
           disabled={selectedCount === 0}
           onClick={() => scheduleDelete(allIds.filter((id) => selectedIds.has(id)))}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-red-500 px-3 py-1.5 text-red-500 disabled:opacity-40"
+          className={cn(
+            'ml-auto inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-transparent dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950',
+            focusRing,
+          )}
         >
           <Trash2 className="size-4" aria-hidden />
           선택 삭제
