@@ -250,3 +250,40 @@
 ### 다음 할 일
 
 - 브라우저 재확인. STEP 8 README, 테스트 보강.
+
+---
+
+## 2026-06-09 — 세션 8: 엣지 케이스 가드 + 테스트 보강 + README
+
+### 사용자 지시
+
+- 테스트 추가 + 엣지 케이스 파악 후 전부 막기 + README 작성.
+
+### 파악한 엣지 케이스 & 가드
+
+- **id 재사용 + 고정 잔존**: MSW가 전부 삭제 후 id를 1부터 재발급 → 과거 고정 id가 남아 무관한
+  새 항목이 고정 표시됨. → 삭제 확정(commit) 시 `pinStore.removePins(ids)`로 정리.
+- **단일 삭제가 전체 선택 해제**: 휴지통 클릭이 `clear()`로 모든 선택 해제 → 삭제된 id만
+  `setMany(ids, false)`로 해제(다른 선택 유지).
+- **긴 입력 방어**: 추가/편집 텍스트 `maxLength={200}`.
+- 과거 날짜: 제출 검증 + date input `min`으로 차단(이미 존재).
+
+### 테스트 보강
+
+- `src/lib/date.test.ts`(신규): startOfToday/daysLeft/isOverdue/isNearDeadline/deadlineLabel/날짜변환 — fake timer로 today 고정.
+- `TodoPage.test.tsx`: 상태필터·핀 상단고정·페이지네이션·다중삭제+Undo·인라인 편집 케이스 추가.
+- 과거 날짜 통합 테스트는 **제거**: jsdom에서 controlled date input의 값 변경이 React state로
+  반영되지 않아 신뢰성 없음(실브라우저 정상). 규칙은 date.test.ts로 단위 검증.
+- 최종 **16 tests 통과**(date 6 + TodoPage 10).
+
+### README
+
+- 실행법/요구사항 체크리스트/스택+선택이유/아키텍처/핵심 설계결정/접근성/테스트/제외범위/개발기록 작성.
+
+### 검증
+
+- lint(--max-warnings 0) · test(16) · build 모두 통과.
+
+### 다음 할 일
+
+- 필요 시 추가 폴리시/테스트. 제출 준비(.git 포함).
