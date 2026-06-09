@@ -1,4 +1,4 @@
-import { Check, Pencil, Pin, Trash2 } from 'lucide-react'
+import { Circle, CircleCheck, Pencil, Pin, Trash2 } from 'lucide-react'
 import { useToggleDone } from '../../hooks/useTodos'
 import { cn } from '../../lib/cn'
 import { deadlineLabel, isNearDeadline, isOverdue } from '../../lib/date'
@@ -35,21 +35,26 @@ export function TodoRow({ todo, onEdit }: { todo: ToDo; onEdit: () => void }) {
         className={cn('size-4 shrink-0 cursor-pointer accent-indigo-600', focusRing)}
       />
 
-      {/* 완료 토글 — 선택 체크박스와 구분되는 원형 버튼 */}
+      {/* 완료/진행중 상태 토글 — 체크박스가 아닌 상태 칩(클릭 시 전환) */}
       <button
         type="button"
         onClick={() => toggleDone(todo)}
         aria-pressed={todo.done}
         aria-label={todo.done ? `${todo.text} 완료 취소` : `${todo.text} 완료 처리`}
         className={cn(
-          'flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors',
+          'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
           todo.done
-            ? 'border-indigo-600 bg-indigo-600 text-white'
-            : 'border-gray-300 text-transparent hover:border-indigo-500 dark:border-gray-600',
+            ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
           focusRing,
         )}
       >
-        <Check className="size-3.5" strokeWidth={3} aria-hidden />
+        {todo.done ? (
+          <CircleCheck className="size-3.5" aria-hidden />
+        ) : (
+          <Circle className="size-3.5" aria-hidden />
+        )}
+        {todo.done ? '완료' : '진행중'}
       </button>
 
       {/* 내용 + 고정 표시 */}
