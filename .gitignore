@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
+
+# 워크플로우 문서 — 고유 자산이므로 git 추적 제외 (대화 로그 docs/는 추적함)
+.claude/
+CLAUDE.md
