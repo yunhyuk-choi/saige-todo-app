@@ -57,6 +57,7 @@ export function AddTodoForm() {
           placeholder="할 일을 입력하세요"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          maxLength={200}
           aria-label="할 일 내용"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? 'add-todo-error' : undefined}

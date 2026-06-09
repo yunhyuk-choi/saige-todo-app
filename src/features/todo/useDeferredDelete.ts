@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { deleteTodo } from '../../api/todos'
 import { todosKey } from '../../hooks/useTodos'
 import { getErrorMessage } from '../../lib/error'
+import { usePinStore } from '../../stores/pinStore'
 import { useSelectionStore } from '../../stores/selectionStore'
 import { useToastStore } from '../../stores/toastStore'
 import type { ToDo } from '../../types/api'
@@ -14,7 +15,7 @@ export function useDeferredDelete() {
   const qc = useQueryClient()
   const push = useToastStore((s) => s.push)
   const dismiss = useToastStore((s) => s.dismiss)
-  const clearSelection = useSelectionStore((s) => s.clear)
+  const deselect = useSelectionStore((s) => s.setMany)
 
   function scheduleDelete(ids: number[]) {
     if (ids.length === 0) return
@@ -23,9 +24,9 @@ export function useDeferredDelete() {
     const removed = current.filter((t) => idSet.has(t.id))
     if (removed.length === 0) return
 
-    // 낙관적 제거 + 선택 해제
+    // 낙관적 제거 + 해당 항목만 선택 해제(다른 선택은 유지)
     qc.setQueryData<ToDo[]>(todosKey, (old) => (old ?? []).filter((t) => !idSet.has(t.id)))
-    clearSelection()
+    deselect(ids, false)
 
     const timer: { id?: ReturnType<typeof setTimeout> } = {}
 
@@ -36,6 +37,8 @@ export function useDeferredDelete() {
     const commit = async () => {
       try {
         await Promise.all(removed.map((t) => deleteTodo(t.id)))
+        // 실제 삭제 확정 시 고정 정보 정리(삭제 후 id 재사용 대비)
+        usePinStore.getState().removePins(ids)
       } catch (error) {
         restore() // 실패 시 복원
         useToastStore.getState().push({ message: getErrorMessage(error), type: 'error' })

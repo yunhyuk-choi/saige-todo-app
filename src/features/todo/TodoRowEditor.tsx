@@ -41,6 +41,7 @@ export function TodoRowEditor({ todo, onClose }: { todo: ToDo; onClose: () => vo
           className={cn(inputClass, 'min-w-40 flex-1')}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          maxLength={200}
           aria-label="할 일 내용 수정"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `edit-error-${todo.id}` : undefined}
