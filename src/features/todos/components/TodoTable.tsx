@@ -40,7 +40,7 @@ function TodoTable() {
             </TableCell>
             <TableCell>할 일</TableCell>
             <TableCell sx={{ width: { sm: 240 } }}>기한</TableCell>
-            <TableCell align="right" sx={{ width: 96 }}>
+            <TableCell align="right" sx={{ width: 112 }}>
               관리
             </TableCell>
           </TableRow>

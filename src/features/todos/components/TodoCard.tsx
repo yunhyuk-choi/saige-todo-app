@@ -10,6 +10,8 @@ import {
   alpha,
 } from '@mui/material'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded'
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined'
 import DeadlineCell from './DeadlineCell'
 import TodoCardEditor from './TodoCardEditor'
 import { ToDo } from '../../../types/api'
@@ -44,6 +46,8 @@ function TodoCard({
 }: TodoCardProps) {
   const selected = useTodoListStore((s) => s.selectedIds.has(todo.id))
   const toggleSelect = useTodoListStore((s) => s.toggleSelect)
+  const pinned = useTodoListStore((s) => s.pinnedIds.includes(todo.id))
+  const togglePin = useTodoListStore((s) => s.togglePin)
 
   const status = getDeadlineStatus(todo.deadline)
   const highlight = !todo.done && (status === 'soon' || status === 'overdue')
@@ -101,6 +105,20 @@ function TodoCard({
               label="완료"
             />
           </Box>
+          <IconButton
+            size="small"
+            color={pinned ? 'primary' : 'default'}
+            onClick={() => togglePin(todo.id)}
+            aria-label={
+              pinned ? `${todo.text} 고정 해제` : `${todo.text} 상단 고정`
+            }
+          >
+            {pinned ? (
+              <PushPinRoundedIcon fontSize="small" />
+            ) : (
+              <PushPinOutlinedIcon fontSize="small" />
+            )}
+          </IconButton>
           <IconButton
             size="small"
             onClick={() => onStartEdit(todo.id)}

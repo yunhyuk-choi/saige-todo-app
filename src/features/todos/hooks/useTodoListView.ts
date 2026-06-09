@@ -27,23 +27,31 @@ interface TodoListViewResult {
  */
 export function useTodoListView(): TodoListViewResult {
   const query = useTodoListStore((s) => s.query)
+  const pinnedIds = useTodoListStore((s) => s.pinnedIds)
 
   const select = useCallback(
     (all: ToDo[]) => {
       const k = query.trim().toLowerCase()
+      const pinned = new Set(pinnedIds)
       return all
         .filter((todo) => (k ? todo.text.toLowerCase().includes(k) : true))
-        .sort(sortTodos)
+        .sort((a, b) => {
+          // 고정 항목이 항상 최상단. 같은 그룹 안에서는 기본 정렬 규칙 적용.
+          const ap = pinned.has(a.id)
+          const bp = pinned.has(b.id)
+          if (ap !== bp) return ap ? -1 : 1
+          return sortTodos(a, b)
+        })
     },
-    [query]
+    [query, pinnedIds]
   )
 
   const result = useQuery({
     queryKey: TODOS_QUERY_KEY,
     queryFn: async () => {
       const data = (await todosApi.list()) ?? []
-      // 서버 목록이 갱신될 때, 더 이상 없는 항목의 선택을 함께 정리합니다.
-      useTodoListStore.getState().pruneSelection(data.map((t) => t.id))
+      // 서버 목록이 갱신될 때, 더 이상 없는 항목의 선택·고정을 함께 정리합니다.
+      useTodoListStore.getState().pruneMissing(data.map((t) => t.id))
       return data
     },
 
